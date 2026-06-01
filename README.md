@@ -85,9 +85,9 @@ financial-risk-sql-analytics/
 
 ```bash
 # Clone the repository
-git clone https://github.com/RupanshiZ/financial-risk-sql-analytics.git
+git clone https://github.com/RupanshiZ/financial-risk-analytics.git
 
-cd financial-risk-sql-analytics
+cd financial-risk-analytics
 
 # Install dependencies
 pip install -r requirements.txt
