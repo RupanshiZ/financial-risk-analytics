@@ -1,0 +1,129 @@
+-- =============================================================================
+-- schema.sql — Lending Club SQL Credit Risk Analytics
+--
+-- Documents the two analytical tables created by
+-- scripts/load_lending_club_data.py.  This file is for reference; the tables
+-- are created directly by the loader, not by executing this DDL.
+--
+-- Database: data/processed/lending_club.duckdb  (DuckDB)
+-- Source  : Kaggle — Lending Club Loan Data 2007–2018 Q4
+-- =============================================================================
+
+
+-- =============================================================================
+-- accepted_loans
+-- All originated (funded) loans, 2007–2018 Q4.
+-- ~2.26 million rows after cleaning.
+--
+-- Default definition used throughout analysis:
+--   IS DEFAULT  = loan_status IN ('Charged Off', 'Default',
+--                  'Does not meet the credit policy. Status:Charged Off')
+--
+--   RESOLVED    = loan_status IN ('Fully Paid', 'Charged Off', 'Default',
+--                  'Does not meet the credit policy. Status:Fully Paid',
+--                  'Does not meet the credit policy. Status:Charged Off')
+--
+-- Note: always restrict default-rate denominators to RESOLVED loans only.
+-- "Current" loans have not yet had the chance to default or pay off.
+-- =============================================================================
+
+-- accepted_loans (
+--
+--   -- Identifiers
+--   id                    VARCHAR,    -- Unique loan ID
+--   member_id             VARCHAR,    -- Borrower member ID
+--
+--   -- Core loan fields
+--   loan_amnt             DOUBLE,     -- Requested amount (£/$ — raw LC data is USD)
+--   funded_amnt           DOUBLE,     -- Actual amount funded
+--   funded_amnt_inv       DOUBLE,     -- Amount funded by investors
+--   term_months           INTEGER,    -- Loan term: 36 or 60 months
+--   int_rate              DOUBLE,     -- Annual interest rate (%), e.g. 7.89
+--   installment           DOUBLE,     -- Monthly payment ($)
+--
+--   -- Grade classification (A = lowest risk → G = highest risk)
+--   grade                 VARCHAR,    -- A | B | C | D | E | F | G
+--   sub_grade             VARCHAR,    -- A1 … G5
+--
+--   -- Employment
+--   emp_title             VARCHAR,    -- Job title (free text, inconsistent)
+--   emp_length            VARCHAR,    -- '< 1 year' | '1 year' | … | '10+ years' | 'n/a'
+--
+--   -- Housing
+--   home_ownership        VARCHAR,    -- MORTGAGE | OWN | RENT | OTHER | NONE
+--
+--   -- Income and DTI
+--   annual_inc            DOUBLE,     -- Self-reported annual income ($)
+--   verification_status   VARCHAR,    -- Not Verified | Source Verified | Verified
+--   dti                   DOUBLE,     -- Debt-to-income ratio (%, excl. mortgage)
+--
+--   -- Dates (all parsed from 'Mon-YYYY' format during loading)
+--   issue_d               DATE,       -- Month loan was issued
+--   earliest_cr_line      DATE,       -- Borrower's earliest open credit line
+--   last_pymnt_d          DATE,       -- Date of last payment received
+--   last_credit_pull_d    DATE,       -- Last credit pull by LC
+--   next_pymnt_d          DATE,       -- Scheduled next payment date
+--
+--   -- Loan categorisation
+--   loan_status           VARCHAR,    -- See default definition above
+--   purpose               VARCHAR,    -- debt_consolidation | credit_card | home_improvement | …
+--   title                 VARCHAR,    -- Borrower-supplied loan title (free text)
+--   zip_code              VARCHAR,    -- 3-digit masked zip prefix
+--   addr_state            VARCHAR,    -- US state code (e.g. CA, TX)
+--
+--   -- Credit profile at origination
+--   delinq_2yrs           DOUBLE,     -- Delinquencies in past 2 years
+--   fico_range_low        DOUBLE,     -- FICO score lower bound
+--   fico_range_high       DOUBLE,     -- FICO score upper bound
+--   fico_avg              DOUBLE,     -- Midpoint: (low + high) / 2
+--   inq_last_6mths        DOUBLE,     -- Hard credit enquiries in last 6 months
+--   open_acc              DOUBLE,     -- Open credit lines
+--   pub_rec               DOUBLE,     -- Derogatory public records
+--   pub_rec_bankruptcies  DOUBLE,     -- Bankruptcies
+--   revol_bal             DOUBLE,     -- Revolving credit balance ($)
+--   revol_util            DOUBLE,     -- Revolving utilisation (%), e.g. 45.6
+--   total_acc             DOUBLE,     -- Total credit lines
+--   mths_since_last_delinq DOUBLE,    -- Months since last delinquency (NULL if never)
+--   collections_12_mths_ex_med DOUBLE,-- Collections in last 12 months (excl. medical)
+--
+--   -- Payment outcomes
+--   total_pymnt           DOUBLE,     -- Total amount received by investors
+--   total_rec_prncp       DOUBLE,     -- Principal received
+--   total_rec_int         DOUBLE,     -- Interest received
+--   total_rec_late_fee    DOUBLE,     -- Late fees received
+--   recoveries            DOUBLE,     -- Post-charge-off gross recovery
+--   collection_recovery_fee DOUBLE,   -- Post-charge-off collection fee
+--   last_pymnt_amnt       DOUBLE,     -- Last payment amount
+--   out_prncp             DOUBLE,     -- Remaining outstanding principal
+--
+--   -- Application metadata
+--   application_type      VARCHAR,    -- Individual | Joint App
+--   annual_inc_joint      DOUBLE,     -- Joint income (Joint App only)
+--   dti_joint             DOUBLE,     -- Joint DTI (Joint App only)
+--   debt_settlement_flag  VARCHAR,    -- Y | N
+--   policy_code           DOUBLE,     -- LC policy code (1 = publicly available products)
+--   pymnt_plan            VARCHAR,    -- y | n (payment plan in place)
+--   initial_list_status   VARCHAR     -- w | f (whole loan or fractional)
+-- );
+
+
+-- =============================================================================
+-- rejected_applications
+-- Applications declined by Lending Club, 2007–2018 Q4.
+-- ~27 million rows.  Much less detail than accepted_loans.
+--
+-- Note: risk_score here is the FICO score of the rejected applicant,
+-- making it comparable to fico_avg in accepted_loans.
+-- =============================================================================
+
+-- rejected_applications (
+--   amount_requested      DOUBLE,     -- Amount the applicant requested ($)
+--   application_date      DATE,       -- Application submission date
+--   loan_title            VARCHAR,    -- Borrower-supplied description
+--   risk_score            DOUBLE,     -- FICO credit score at rejection
+--   debt_to_income_ratio  DOUBLE,     -- DTI ratio (%)
+--   zip_code              VARCHAR,    -- 3-digit masked zip prefix
+--   state                 VARCHAR,    -- US state code
+--   employment_length     VARCHAR,    -- Same format as emp_length in accepted
+--   policy_code           VARCHAR     -- LC policy code
+-- );

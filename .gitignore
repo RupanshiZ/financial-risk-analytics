@@ -1,0 +1,32 @@
+# Raw data files — download from Kaggle (see data/README.md)
+data/raw/*.csv
+data/raw/*.zip
+data/raw/*.gz
+
+# Compiled DuckDB database
+data/processed/*.duckdb
+data/processed/*.duckdb.wal
+
+# Generated output CSVs
+outputs/*.csv
+!outputs/sample_default_rate_by_grade.csv
+!outputs/sample_dti_decile_analysis.csv
+!outputs/sample_vintage_summary.csv
+!outputs/sample_accepted_vs_rejected_comparison.csv
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+dist/
+build/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
